@@ -109,7 +109,7 @@ class Simple_mailchimp {
 
         // Prepare the opening form tag
         $form_details = array();
-        $form_details['action']        = '';
+        $form_details['action']        = $_SERVER['PHP_SELF'];
         $form_details['name']          = $form_name;
         $form_details['id']            = $this->EE->TMPL->form_id;
         $form_details['class']         = $this->EE->TMPL->form_class;
