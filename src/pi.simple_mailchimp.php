@@ -146,7 +146,7 @@ There is only one tag to embed a MailChimp for on your website:
 Parameters
 ===========================
 
-The tag has seven possible parameters:
+The tag has the following possible parameters:
 
 - api_key - Your API key.
 - list_id - The ID of the list you would like to subscribe users to.
