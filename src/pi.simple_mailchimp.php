@@ -276,7 +276,7 @@ Simple MailChimp
 
 There is only one tag to embed a MailChimp for on your website:
 
-{exp:simple_mailchimp}
+`{exp:simple_mailchimp}`
 
 
 Parameters
@@ -284,14 +284,14 @@ Parameters
 
 The tag has the following possible parameters:
 
-- api_key - Your API key.
-- list_id - The ID of the list you would like to subscribe users to.
-- form_name - A unique name for this form.
-- return - The path to the page to display on a successful submission.
-- error_delimiters - How the error fields are outputted.
-- form_class - The class to be applied to the form element.
-- form_id - The ID to be applied to the form element.
-- email_field - The merge field that contains the users email. (Default "EMAIL")
+- `api_key` - Your API key.
+- `list_id` - The ID of the list you would like to subscribe users to.
+- `form_name` - A unique name for this form.
+- `return` - The path to the page to display on a successful submission.
+- `error_delimiters` - How the error fields are outputted.
+- `form_class` - The class to be applied to the form element.
+- `form_id` - The ID to be applied to the form element.
+- `email_field` - The merge field that contains the users email. (Default "EMAIL")
 
 
 Single Variables
@@ -300,66 +300,67 @@ Single Variables
 {label:MERGE}
 ---------------------------
 
-The {label:MERGE} variable displays a label where MERGE is the merge tag for
-that field (e.g. {label:EMAIL}).
+The `{label:MERGE}` variable displays a label where `MERGE` is the merge tag for
+that field (e.g. `{label:EMAIL}`).
 
-The {label:MERGE} variable accepts a number of parameters as follows:
+The `{label:MERGE}` variable accepts a number of parameters as follows:
 
-- text - The text to be displayed between label tags. (Default The field name
+- `text` - The text to be displayed between `label` tags. (Default The field name
   specified in MailChimp)
-- attr:ATTR - Where ATTR is any HTML attribute that will be applied to the
-  opening label tag. (e.g. attr:class="form-label" will apply a class of
-  form-label to the tag) Some attributes can not be overridden. For this variable
-  you can not override the "for" attribute.
+- `attr:ATTR` - Where `ATTR` is any HTML attribute that will be applied to the
+  opening label tag. (e.g. `attr:class="form-label"` will apply a class of
+  `form-label` to the tag) Some attributes can not be overridden. For this variable
+  you can not override the `for` attribute.
 
 {merge:MERGE}
 ---------------------------
 
-The {merge:MERGE} variable displays a merge field where MERGE is the merge tag
-for that field (e.g. {merge:EMAIL}).
+The `{merge:MERGE}` variable displays a merge field where `MERGE` is the merge tag
+for that field (e.g. `{merge:EMAIL}`).
 
-The {merge:MERGE} variable accepts attr:ATTR parameters as described above. The
-attributes than can not be overridden on this variable are "name", "id" and
-"required".
+The `{merge:MERGE}` variable accepts `attr:ATTR` parameters as described above. The
+attributes than can not be overridden on this variable are `name`, `id` and
+`required`.
 
 {error:MERGE}
 ---------------------------
 
-The {error:MERGE} variable displays an error if a field is not filled out
-correctly where MERGE is the merge tag for the field. If the field is filled
+The `{error:MERGE}` variable displays an error if a field is not filled out
+correctly where `MERGE` is the merge tag for the field. If the field is filled
 out correctly, nothing is displayed (not even the wrapping elements).
 
 {submit}
 ---------------------------
 
-The {submit} variable displays the submit button for the form.
+The `{submit}` variable displays the submit button for the form.
 
-The {submit} variable accepts for following parameters:
+The `{submit}` variable accepts for following parameters:
 
-- type - This determines whether the outputted tag will be an input[type=submit]
-  or a button. Any value other than "button" will display an input[type=submit].
-- value - The text displayed on the submit button. (Default "Subscribe")
-- attr:ATTR - As described above. For this variable you can not override the
-  "type" attribute.
+- `type` - This determines whether the outputted tag will be an `input[type=submit]`
+  or a `button`. Any value other than "button" will display an `input[type=submit]`.
+- `value` - The text displayed on the submit button. (Default "Subscribe")
+- `attr:ATTR` - As described above. For this variable you can not override the
+  `type` attribute.
 
 
 Conditional Variables
 ===========================
 
-success
+{success}
 ---------------------------
 
-The {success} conditional variable can be used to display a success message if
+The `{success}` conditional variable can be used to display a success message if
 if the form submission is successful.
 
 
 Example
 ===========================
 
+```
 {exp:simple_mailchimp
-  api_key="1234567890abcdef1234567890abcdef-us2"
-  list_id="1234567890"
-  error_delimeters='<p class="error">|</p>'}
+api_key="1234567890abcdef1234567890abcdef-us2"
+list_id="1234567890"
+error_delimeters='<p class="error">|</p>'}
     {if success}
         <p class="success">Success! Check your email to activate your subscription.</p>
     {if:else}
@@ -376,10 +377,19 @@ Example
         {submit}
     {/if}
 {/exp:simple_mailchimp}
+```
 
 
 Changelog
 ===========================
+
+Version 1.1.0
+---------------------------
+
+- Add email_field parameter to plugin tag
+- Add parameters and attributes to single vars
+- Fix bug where confirmation email would always sent to site owner
+- Fix a bug where form would just redirect to site index and not be processed
 
 Version 1.0.0
 ---------------------------
