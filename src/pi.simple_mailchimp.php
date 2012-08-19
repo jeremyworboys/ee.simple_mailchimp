@@ -41,7 +41,9 @@ class Simple_mailchimp {
         $form_name        = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
         $return           = $this->EE->TMPL->fetch_param('return');
         $error_delimiters = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
-        $success          = FALSE;
+        $email_field      = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
+        $tagdata          = $this->EE->TMPL->tagdata;
+        $this->success    = FALSE;
 
         // Set global error delimiters
         $error_delimiters = explode('|', $error_delimiters);
@@ -51,12 +53,12 @@ class Simple_mailchimp {
         require_once(PATH_THIRD.'simple_mailchimp/libraries/MCAPI.class.php');
 
         $MC = new MCAPI($api_key);
-        $fields = $MC->listMergeVars($list_id);
+        $mc_fields = $MC->listMergeVars($list_id);
 
         // Check to see if the form has been submitted
         if (!empty($_POST) AND $this->EE->input->post(md5($form_name), true)) {
             // Prepare validation rules
-            foreach ($fields as $field) {
+            foreach ($mc_fields as $field) {
                 // Build validation rule array
                 $validation = array();
                 $validation[] = 'trim';
@@ -75,37 +77,28 @@ class Simple_mailchimp {
             if ($this->EE->form_validation->run()) {
                 // Awesome, let's build the merge vars array
                 $merge_vars = array();
-                foreach ($fields as $field) {
+                foreach ($mc_fields as $field) {
                     $tag = $field['tag'];
                     if (isset($_POST[$tag])) {
                         $merge_vars[$tag] = $this->EE->input->post($tag, TRUE);
                     }
                 }
                 // Finally subscribe the user
-                $MC->listSubscribe($list_id, $this->EE->config->item('webmaster_email'), $merge_vars);
+                $MC->listSubscribe($list_id, $merge_vars[$email_field], $merge_vars);
 
                 // Redirect to the "return" path
                 if ($return) {
                     $return = $this->EE->functions->create_url($return);
                     $this->EE->functions->redirect($return);
                 }
-                $success = TRUE;
+                $this->success = TRUE;
             }
             // Otherwise, continue displaying the page
         }
 
-        // Parse the variables
-        $tag_vars = array();
-        foreach ($fields as $field) {
-            if (!$field['public']) { continue; }
-            extract($field);
-
-            $tag_vars["label:$tag"] = "<label for='$tag'>$name</label>";
-            $tag_vars["merge:$tag"] = "<input type='$field_type' name='$tag' id='$tag' value='".set_value($tag, $default).'\''.(($req)?' required="required"':'').' />';
-            $tag_vars["error:$tag"] = form_error($tag);
-        }
-        $tag_vars['submit'] = '<input type="submit" value="Subscribe" />';
-        $tag_vars['success'] = $success;
+        // Handle conditionals early
+        $cond['success'] = $this->success;
+        $tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
 
         // Prepare the opening form tag
         $form_details = array();
@@ -117,7 +110,7 @@ class Simple_mailchimp {
 
         // Generate the output
         $output  = $this->EE->functions->form_declaration($form_details);
-        $output .= $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, array($tag_vars));
+        $output .= $this->parse_tagdata($tagdata, $mc_fields);
         $output .= '</form>';
 
         // Send to browser
@@ -127,9 +120,152 @@ class Simple_mailchimp {
 // -----------------------------------------------------------------------------
 
     /**
+     * Parse Tag Data
+     *
+     * @param  string Raw tagdata
+     * @param  array  Merge fields from MailChimp
+     * @return string Parsed tagdata
+     */
+    private function parse_tagdata($tagdata, $mc_fields)
+    {
+        // Remap fields so they can be looked up by tag name
+        $map_fields = array();
+        foreach ($mc_fields as $field) {
+            $map_fields[$field['tag']] = $field;
+        }
+
+        // Loop over all single var tags
+        foreach ($this->EE->TMPL->var_single as $raw_tag => $val) {
+            // Setup tag parsing
+            $args       = $this->EE->functions->assign_parameters($raw_tag) ?: array();
+            $key        = array_shift(explode(' ', $raw_tag));
+            $attr       = array();
+            $params     = array();
+            $var_tag    = false;
+            $parsed_var = '';
+
+            // {label:MERGE}
+            if (substr($key, 0, 6) === 'label:') {
+                $var_tag = 'label';
+                $merge = substr($key, 6);
+                unset($args['attr:for']);
+            }
+            // {merge:MERGE}
+            elseif (substr($key, 0, 6) === 'merge:') {
+                $var_tag = 'merge';
+                $merge = substr($key, 6);
+                unset($args['attr:name'], $args['attr:id'], $args['attr:required']);
+            }
+            // {error:MERGE}
+            elseif (substr($key, 0, 6) === 'error:') {
+                $var_tag = 'error';
+                $merge = substr($key, 6);
+            }
+            // {submit}
+            elseif (substr($key, 0, 6) === 'submit') {
+                $var_tag = 'submit';
+                unset($args['attr:type']);
+                $params['type'] = 'input';
+                $params['value'] = 'Subscribe';
+            }
+
+            // Separate attributes from params
+            foreach ($args as $key => $value) {
+                if (substr($key, 0, 5) === 'attr:') {
+                    $attr[substr($key, 5)] = $value;
+                }
+                else {
+                    $params[$key] = $value;
+                }
+            }
+
+            // Extract MERGE field
+             if (in_array($var_tag, array('label', 'merge', 'submit'))) {
+                // $name, $req, $field_type, $public, $show, $order, $default, $helptext, $size, $tag
+                extract($map_fields[$merge]);
+            }
+
+            // Build tag replacement
+            switch ($var_tag) {
+                // {label:MERGE tag}
+                case 'label':
+                    // Set defaults from extracted MC field
+                    $tag_attrs = array(
+                        "for=\"{$tag}\""
+                    );
+                    // Add user specified attributes
+                    foreach ($attr as $key => $val) {
+                        $tag_attrs[] = "{$key}=\"{$val}\"";
+                    }
+                    if (!isset($params['text'])) {
+                        $params['text'] = $name;
+                    }
+                    // Combine into tag
+                    $parsed_var .= '<label '.implode(' ', $tag_attrs).">{$params['text']}</label>";
+                    break;
+
+                // {merge:MERGE tag}
+                case 'merge':
+                    // Set defaults from extracted MC field
+                    $tag_attrs = array(
+                        "type=\"{$field_type}\"",
+                        "name=\"{$tag}\"",
+                        "id=\"{$tag}\""
+                    );
+                    // Add required if required
+                    if ($req) {
+                        $tag_attrs[] = "required=\"required\"";
+                    }
+                    // Add user specified attributes
+                    foreach ($attr as $key => $val) {
+                        $tag_attrs[] = "{$key}=\"{$val}\"";
+                    }
+                    // Combine into tag
+                    $parsed_var .= '<input '.implode(' ', $tag_attrs)." />";
+                    break;
+
+                // {error:MERGE tag}
+                case 'error':
+                    // Create tag
+                    $parsed_var .= form_error($tag);
+                    break;
+
+                // {submit}
+                case 'submit':
+                    // Set defaults from extracted MC field
+                    $tag_attrs = array(
+                        "type=\"submit\""
+                    );
+                    // Add user specified attributes
+                    foreach ($attr as $key => $val) {
+                        $tag_attrs[] = "{$key}=\"{$val}\"";
+                    }
+                    // Determine output type
+                    if ($params['type'] === 'button') {
+                        // Combine into tag
+                        $parsed_var .= '<button '.implode(' ', $tag_attrs).">{$params['value']}</button>";
+                    }
+                    else {
+                        $tag_attrs[] = "value=\"{$params['value']}\"";
+                        // Combine into tag
+                        $parsed_var .= '<input '.implode(' ', $tag_attrs)." />";
+                    }
+                    break;
+            }
+
+            // Swap out parsed variable
+            $tagdata = $this->EE->TMPL->swap_var_single($raw_tag, $parsed_var, $tagdata);
+        }
+
+        return $tagdata;
+    }
+
+// -----------------------------------------------------------------------------
+
+    /**
      * Usage
      *
-     * @return string How to use this plugin.
+     * @return string How to use this plugin
      */
     public function usage()
     {
@@ -155,34 +291,56 @@ The tag has the following possible parameters:
 - error_delimiters - How the error fields are outputted.
 - form_class - The class to be applied to the form element.
 - form_id - The ID to be applied to the form element.
+- email_field - The merge field that contains the users email. (Default "EMAIL")
 
 
 Single Variables
 ===========================
 
-{merge:TAG}
+{label:MERGE}
 ---------------------------
 
-The {merge:TAG} variable displays a merge field where TAG is the merge tag for
-that field (e.g. {merge:EMAIL}).
-
-{label:TAG}
----------------------------
-
-The {label:TAG} variable displays a label where TAG is the merge tag for
+The {label:MERGE} variable displays a label where MERGE is the merge tag for
 that field (e.g. {label:EMAIL}).
 
-{error:TAG}
+The {label:MERGE} variable accepts a number of parameters as follows:
+
+- text - The text to be displayed between label tags. (Default The field name
+  specified in MailChimp)
+- attr:ATTR - Where ATTR is any HTML attribute that will be applied to the
+  opening label tag. (e.g. attr:class="form-label" will apply a class of
+  form-label to the tag) Some attributes can not be overridden. For this variable
+  you can not override the "for" attribute.
+
+{merge:MERGE}
 ---------------------------
 
-The {error:TAG} variable displays an error if a field is not filled out
-correctly where TAG is the merge tag for the field. If the field is filled out
-correctly, nothing is displayed (not even the wrapping elements).
+The {merge:MERGE} variable displays a merge field where MERGE is the merge tag
+for that field (e.g. {merge:EMAIL}).
+
+The {merge:MERGE} variable accepts attr:ATTR parameters as described above. The
+attributes than can not be overridden on this variable are "name", "id" and
+"required".
+
+{error:MERGE}
+---------------------------
+
+The {error:MERGE} variable displays an error if a field is not filled out
+correctly where MERGE is the merge tag for the field. If the field is filled
+out correctly, nothing is displayed (not even the wrapping elements).
 
 {submit}
 ---------------------------
 
 The {submit} variable displays the submit button for the form.
+
+The {submit} variable accepts for following parameters:
+
+- type - This determines whether the outputted tag will be an input[type=submit]
+  or a button. Any value other than "button" will display an input[type=submit].
+- value - The text displayed on the submit button. (Default "Subscribe")
+- attr:ATTR - As described above. For this variable you can not override the
+  "type" attribute.
 
 
 Conditional Variables
@@ -191,7 +349,7 @@ Conditional Variables
 success
 ---------------------------
 
-The `success` conditional variable can be used to display a success message if
+The {success} conditional variable can be used to display a success message if
 if the form submission is successful.
 
 
