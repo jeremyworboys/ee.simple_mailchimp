@@ -137,7 +137,8 @@ class Simple_mailchimp {
         // Loop over all single var tags
         foreach ($this->EE->TMPL->var_single as $raw_tag => $val) {
             // Setup tag parsing
-            $args       = $this->EE->functions->assign_parameters($raw_tag) ?: array();
+            $args       = $this->EE->functions->assign_parameters($raw_tag);
+            $args       = $args ? $args : array();
             $key        = array_shift(explode(' ', $raw_tag));
             $attr       = array();
             $params     = array();
