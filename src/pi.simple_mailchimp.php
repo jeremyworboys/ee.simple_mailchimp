@@ -384,6 +384,11 @@ error_delimeters='<p class="error">|</p>'}
 Changelog
 ===========================
 
+Version 1.1.1
+---------------------------
+
+- Fix bug where control panel would display white screen of death
+
 Version 1.1.0
 ---------------------------
 
