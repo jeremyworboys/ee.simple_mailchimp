@@ -385,6 +385,11 @@ error_delimeters='<p class="error">|</p>'}
 Changelog
 ===========================
 
+Version 1.1.2
+---------------------------
+
+- Fix bug where form may POST to index.php
+
 Version 1.1.1
 ---------------------------
 
