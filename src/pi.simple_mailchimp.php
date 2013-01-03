@@ -222,6 +222,10 @@ class Simple_mailchimp {
                     foreach ($attr as $key => $val) {
                         $tag_attrs[] = "{$key}=\"{$val}\"";
                     }
+                    // Add value if previously set (i.e. when showing an error)
+                    if ($value = $this->EE->input->post($tag)) {
+                        $tag_attrs[] = "value=\"{$value}\"";
+                    }
                     // Combine into tag
                     $parsed_var .= '<input '.implode(' ', $tag_attrs)." />";
                     break;
@@ -384,6 +388,11 @@ error_delimeters='<p class="error">|</p>'}
 
 Changelog
 ===========================
+
+Version 1.1.3
+---------------------------
+
+- When showing errors, merge fields should retain previously entered content
 
 Version 1.1.2
 ---------------------------
