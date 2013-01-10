@@ -40,6 +40,7 @@ class Simple_mailchimp {
         $list_id          = $this->EE->TMPL->fetch_param('list_id');
         $form_name        = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
         $return           = $this->EE->TMPL->fetch_param('return');
+        $browser_validate = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
         $error_delimiters = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
         $email_field      = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
         $tagdata          = $this->EE->TMPL->tagdata;
@@ -111,6 +112,11 @@ class Simple_mailchimp {
 
         // Generate the output
         $output  = $this->EE->functions->form_declaration($form_details);
+        if (!$browser_validate) {
+            $parts = explode('>', $output, 2);
+            $parts[0] .= ' novalidate="true"';
+            $output = implode('>', $parts);
+        }
         $output .= $this->parse_tagdata($tagdata, $mc_fields);
         $output .= '</form>';
 
