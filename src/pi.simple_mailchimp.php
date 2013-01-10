@@ -136,10 +136,17 @@ class Simple_mailchimp {
     private function parse_tagdata($tagdata, $mc_fields)
     {
         // Remap fields so they can be looked up by tag name
+        // Also construct the error conditionals so we don't need two loops
+        $cond = array();
         $map_fields = array();
         foreach ($mc_fields as $field) {
-            $map_fields[$field['tag']] = $field;
+            $tag = $field['tag'];
+            $cond["error:{$tag}"] = !!form_error($tag);
+            $map_fields[$tag] = $field;
         }
+
+        // Parse conditionals
+        $tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
 
         // Loop over all single var tags
         foreach ($this->EE->TMPL->var_single as $raw_tag => $val) {
