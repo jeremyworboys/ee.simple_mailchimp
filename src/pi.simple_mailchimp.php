@@ -311,6 +311,7 @@ The tag has the following possible parameters:
 - `form_class` - The class to be applied to the form element.
 - `form_id` - The ID to be applied to the form element.
 - `email_field` - The merge field that contains the users email. (Default "EMAIL")
+- `browser_validate` - If anything except "yes" the browser validation will be suppressed. (Default "no")
 
 
 Single Variables
@@ -365,6 +366,12 @@ The `{submit}` variable accepts for following parameters:
 Conditional Variables
 ===========================
 
+{error:MERGE}
+---------------------------
+
+The `{error:MERGE}` conditional variable can be used to create custom error
+messages.
+
 {success}
 ---------------------------
 
@@ -391,7 +398,7 @@ error_delimeters='<p class="error">|</p>'}
         <p>
             {label:MMERGE1}
             {merge:MMERGE1}
-            {error:MMERGE1}
+            {if error:MMERGE1}This is a custom error!{/if}
         </p>
         {submit}
     {/if}
@@ -401,6 +408,12 @@ error_delimeters='<p class="error">|</p>'}
 
 Changelog
 ===========================
+
+Version 1.2.0
+---------------------------
+
+- Add browser_validate parameter to plugin tag
+- Add error:MERGE conditionals
 
 Version 1.1.3
 ---------------------------
