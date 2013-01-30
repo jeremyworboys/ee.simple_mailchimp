@@ -415,6 +415,11 @@ error_delimeters='<p class="error">|</p>'}
 Changelog
 ===========================
 
+Version 1.2.1
+---------------------------
+
+- Fix errors when non-existant MERGE tags are used
+
 Version 1.2.0
 ---------------------------
 
