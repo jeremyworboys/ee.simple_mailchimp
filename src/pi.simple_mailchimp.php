@@ -156,6 +156,7 @@ class Simple_mailchimp {
             $key        = array_shift(explode(' ', $raw_tag));
             $attr       = array();
             $params     = array();
+            $merge      = false;
             $var_tag    = false;
             $parsed_var = '';
 
@@ -182,6 +183,11 @@ class Simple_mailchimp {
                 unset($args['attr:type']);
                 $params['type'] = 'input';
                 $params['value'] = 'Subscribe';
+            }
+
+            // Skip undefined merge fields
+            if ($merge !== false && !isset($map_fields[$merge])) {
+                continue;
             }
 
             // Separate attributes from params
