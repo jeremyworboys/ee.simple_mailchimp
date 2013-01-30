@@ -201,7 +201,7 @@ class Simple_mailchimp {
             }
 
             // Extract MERGE field
-             if (in_array($var_tag, array('label', 'merge', 'submit'))) {
+            if (in_array($var_tag, array('label', 'merge'))) {
                 // $name, $req, $field_type, $public, $show, $order, $default, $helptext, $size, $tag
                 extract($map_fields[$merge]);
             }
