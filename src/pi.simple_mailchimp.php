@@ -43,6 +43,7 @@ class Simple_mailchimp {
         $browser_validate = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
         $error_delimiters = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
         $email_field      = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
+        $double_optin     = $this->EE->TMPL->fetch_param('double_optin', 'yes') === 'yes';
         $tagdata          = $this->EE->TMPL->tagdata;
         $this->success    = FALSE;
 
@@ -85,7 +86,7 @@ class Simple_mailchimp {
                     }
                 }
                 // Finally subscribe the user
-                $MC->listSubscribe($list_id, $merge_vars[$email_field], $merge_vars);
+                $MC->listSubscribe($list_id, $merge_vars[$email_field], $merge_vars, 'html', $double_optin);
 
                 // Redirect to the "return" path
                 if ($return) {
@@ -318,6 +319,7 @@ The tag has the following possible parameters:
 - `form_id` - The ID to be applied to the form element.
 - `email_field` - The merge field that contains the users email. (Default "EMAIL")
 - `browser_validate` - If anything except "yes" the browser validation will be suppressed. (Default "no")
+- `double_optin` - Flag to control whether a double opt-in confirmation message is sent. (Default "yes")
 
 
 Single Variables
@@ -414,6 +416,11 @@ error_delimeters='<p class="error">|</p>'}
 
 Changelog
 ===========================
+
+Version 1.3.0
+---------------------------
+
+- Add double_optin parameter
 
 Version 1.2.1
 ---------------------------
