@@ -230,9 +230,7 @@ class Simple_mailchimp {
                 case 'merge':
                     // Set defaults from extracted MC field
                     $tag_attrs = array(
-                        "type=\"{$field_type}\"",
-                        "name=\"{$tag}\"",
-                        "id=\"{$tag}\""
+                        "id=\"{$tag}\"",
                     );
                     // Add required if required
                     if ($req) {
@@ -242,12 +240,43 @@ class Simple_mailchimp {
                     foreach ($attr as $key => $val) {
                         $tag_attrs[] = "{$key}=\"{$val}\"";
                     }
+
                     // Add value if previously set (i.e. when showing an error)
-                    if ($value = $this->EE->input->post($tag)) {
-                        $tag_attrs[] = "value=\"{$value}\"";
+                    $previous = $this->EE->input->post($tag);
+
+                    // Cast field typee
+                    if ($field_type === 'phone')    $field_type = 'tel';
+                    if ($field_type === 'zip')      $field_type = 'text';
+                    if ($field_type === 'imageurl') $field_type = 'url';
+
+                    // Build field tag
+                    switch ($field_type) {
+                        case "date":
+                        case "email":
+                        case "number":
+                        case "tel":
+                        case "text":
+                        case "url":
+                            $tag_attrs[] = "type=\"{$field_type}\"";
+                            $tag_attrs[] = "autocapitalize=\"off\"";
+                            $tag_attrs[] = "autocorrect=\"off\"";
+                            $parsed_var .= form_input($tag, $previous, implode(' ', $tag_attrs));
+                            break;
+
+                        case "radio":
+                            foreach ($choices as $value) {
+                                $parsed_var .= '<br /><label>'.form_radio($tag, $value, ($value === $previous), implode(' ', $tag_attrs)).'&nbsp;&nbsp;'.$value.'</label>';
+                            }
+                            break;
+
+                        case "dropdown":
+                            $parsed_var .= form_dropdown($tag, $choices, $previous, implode(' ', $tag_attrs));
+                            break;
+
+                        case "birthday":
+                        case "address":
                     }
-                    // Combine into tag
-                    $parsed_var .= '<input '.implode(' ', $tag_attrs)." />";
+
                     break;
 
                 // {error:MERGE tag}
