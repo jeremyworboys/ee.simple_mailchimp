@@ -2,7 +2,7 @@
 
 if (!defined('SIMPLE_MAILCHIMP_VERSION')) {
     define('SIMPLE_MAILCHIMP_NAME', 'Simple MailChimp');
-    define('SIMPLE_MAILCHIMP_VERSION', '1.3.0');
+    define('SIMPLE_MAILCHIMP_VERSION', '1.4.0');
 }
 
 $config['name'] = SIMPLE_MAILCHIMP_NAME;
