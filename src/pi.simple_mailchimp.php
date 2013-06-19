@@ -115,7 +115,7 @@ class Simple_mailchimp {
         $output  = $this->EE->functions->form_declaration($form_details);
         if (!$browser_validate) {
             $parts = explode('>', $output, 2);
-            $parts[0] .= ' novalidate="true"';
+            $parts[0] .= ' novalidate="novalidate"';
             $output = implode('>', $parts);
         }
         $output .= $this->parse_tagdata($tagdata, $mc_fields);
