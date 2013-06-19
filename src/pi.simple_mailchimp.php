@@ -36,16 +36,17 @@ class Simple_mailchimp {
         $this->EE->load->library('form_validation');
 
         // Fetch parameters and set defaults
-        $api_key          = $this->EE->TMPL->fetch_param('api_key');
-        $list_id          = $this->EE->TMPL->fetch_param('list_id');
-        $form_name        = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
-        $return           = $this->EE->TMPL->fetch_param('return');
-        $browser_validate = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
-        $error_delimiters = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
-        $email_field      = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
-        $double_optin     = $this->EE->TMPL->fetch_param('double_optin', 'yes') === 'yes';
-        $tagdata          = $this->EE->TMPL->tagdata;
-        $this->success    = FALSE;
+        $api_key            = $this->EE->TMPL->fetch_param('api_key');
+        $list_id            = $this->EE->TMPL->fetch_param('list_id');
+        $form_name          = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
+        $return             = $this->EE->TMPL->fetch_param('return');
+        $browser_validate   = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
+        $this->w3c_validate = $this->EE->TMPL->fetch_param('w3c_validate', 'no') === 'yes';
+        $error_delimiters   = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
+        $email_field        = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
+        $double_optin       = $this->EE->TMPL->fetch_param('double_optin', 'yes') === 'yes';
+        $tagdata            = $this->EE->TMPL->tagdata;
+        $this->success      = FALSE;
 
         // Set global error delimiters
         $error_delimiters = explode('|', $error_delimiters);
@@ -258,9 +259,11 @@ class Simple_mailchimp {
                         case "text":
                         case "url":
                             $tag_attrs[] = "type=\"{$field_type}\"";
-                            $tag_attrs[] = "autocapitalize=\"off\"";
-                            $tag_attrs[] = "autocorrect=\"off\"";
                             $parsed_var .= preg_replace('/ type="text"/', '', form_input($tag, $previous, implode(' ', $tag_attrs)), 1);
+                            if (!$this->w3c_validate) {
+                                $tag_attrs[] = "autocapitalize=\"off\"";
+                                $tag_attrs[] = "autocorrect=\"off\"";
+                            }
                             break;
 
                         case "radio":
