@@ -269,7 +269,9 @@ class Simple_mailchimp {
 
                         case "radio":
                             foreach ($choices as $value) {
-                                $parsed_var .= '<br /><label>'.form_radio($tag, $value, ($value === $previous), implode(' ', $tag_attrs)).'&nbsp;&nbsp;'.$value.'</label>';
+                                $attrs = implode(' ', $tag_attrs);
+                                $attrs = str_replace("id=\"{$tag}\"", '', $attrs);
+                                $parsed_var .= '<br /><label>'.form_radio($tag, $value, ($value === $previous), $attrs).'&nbsp;&nbsp;'.$value.'</label>';
                             }
                             break;
 
