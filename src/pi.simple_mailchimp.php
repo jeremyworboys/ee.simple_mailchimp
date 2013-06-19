@@ -259,11 +259,12 @@ class Simple_mailchimp {
                         case "text":
                         case "url":
                             $tag_attrs[] = "type=\"{$field_type}\"";
-                            $parsed_var .= preg_replace('/ type="text"/', '', form_input($tag, $previous, implode(' ', $tag_attrs)), 1);
                             if (!$this->w3c_validate) {
                                 $tag_attrs[] = "autocapitalize=\"off\"";
                                 $tag_attrs[] = "autocorrect=\"off\"";
                             }
+                            $input_var = form_input($tag, $previous, implode(' ', $tag_attrs));
+                            $parsed_var .= preg_replace('/ type="text"/', '', $input_var, 1);
                             break;
 
                         case "radio":
