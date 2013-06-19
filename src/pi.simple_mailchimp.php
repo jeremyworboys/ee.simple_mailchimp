@@ -260,7 +260,7 @@ class Simple_mailchimp {
                             $tag_attrs[] = "type=\"{$field_type}\"";
                             $tag_attrs[] = "autocapitalize=\"off\"";
                             $tag_attrs[] = "autocorrect=\"off\"";
-                            $parsed_var .= form_input($tag, $previous, implode(' ', $tag_attrs));
+                            $parsed_var .= preg_replace('/ type="text"/', '', form_input($tag, $previous, implode(' ', $tag_attrs)), 1);
                             break;
 
                         case "radio":
