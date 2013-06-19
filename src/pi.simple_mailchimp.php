@@ -279,6 +279,8 @@ class Simple_mailchimp {
 
                         case "birthday":
                         case "address":
+                            $parsed_var .= "<span style=\"color:red; font-weight:bold;\">WARNING: The MailChimp {$field_type} field type is not currently supported.</span>";
+                            break;
                     }
 
                     break;
