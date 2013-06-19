@@ -365,6 +365,7 @@ The tag has the following possible parameters:
 - `form_id` - The ID to be applied to the form element.
 - `email_field` - The merge field that contains the users email. (Default "EMAIL")
 - `browser_validate` - If anything except "yes" the browser validation will be suppressed. (Default "no")
+- `w3c_validate` - If "yes" helpful (but invalid) input attributes will be suppressed. (Default "no")
 - `double_optin` - Flag to control whether a double opt-in confirmation message is sent. (Default "yes")
 
 
@@ -462,6 +463,22 @@ error_delimeters='<p class="error">|</p>'}
 
 Changelog
 ===========================
+
+Version 1.5.0
+---------------------------
+
+- Remove for="" attr from labels whose input doesn't have an id=""
+- Remove id="" attr from radio inputs
+- Show warning for unsupported field types
+- Add w3c_validate="" option to prevent non-valid (but helpful attributes)
+- Fix novalidate="" attr value
+- Don't output type="" attr twice for text inputs
+- Fix issue where form could POST to the wrong location
+
+Version 1.4.0
+---------------------------
+
+- Add support for more field types
 
 Version 1.3.0
 ---------------------------
