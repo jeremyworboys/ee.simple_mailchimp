@@ -213,9 +213,19 @@ class Simple_mailchimp {
                 // {label:MERGE tag}
                 case 'label':
                     // Set defaults from extracted MC field
-                    $tag_attrs = array(
-                        "for=\"{$tag}\""
-                    );
+                    switch ($field_type) {
+                        case 'address':
+                        case 'birthday':
+                        case 'radio':
+                            $tag_attrs = array();
+                            break;
+
+                        default:
+                            $tag_attrs = array(
+                                "for=\"{$tag}\""
+                            );
+                            break;
+                    }
                     // Add user specified attributes
                     foreach ($attr as $key => $val) {
                         $tag_attrs[] = "{$key}=\"{$val}\"";
