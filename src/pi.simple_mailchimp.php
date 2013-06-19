@@ -36,16 +36,17 @@ class Simple_mailchimp {
         $this->EE->load->library('form_validation');
 
         // Fetch parameters and set defaults
-        $api_key          = $this->EE->TMPL->fetch_param('api_key');
-        $list_id          = $this->EE->TMPL->fetch_param('list_id');
-        $form_name        = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
-        $return           = $this->EE->TMPL->fetch_param('return');
-        $browser_validate = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
-        $error_delimiters = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
-        $email_field      = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
-        $double_optin     = $this->EE->TMPL->fetch_param('double_optin', 'yes') === 'yes';
-        $tagdata          = $this->EE->TMPL->tagdata;
-        $this->success    = FALSE;
+        $api_key            = $this->EE->TMPL->fetch_param('api_key');
+        $list_id            = $this->EE->TMPL->fetch_param('list_id');
+        $form_name          = $this->EE->TMPL->fetch_param('form_name', 'simple_mailchimp');
+        $return             = $this->EE->TMPL->fetch_param('return');
+        $browser_validate   = $this->EE->TMPL->fetch_param('browser_validate', 'no') === 'yes';
+        $this->w3c_validate = $this->EE->TMPL->fetch_param('w3c_validate', 'no') === 'yes';
+        $error_delimiters   = $this->EE->TMPL->fetch_param('error_delimiters', '<span class="error">|</span>');
+        $email_field        = $this->EE->TMPL->fetch_param('email_field', 'EMAIL');
+        $double_optin       = $this->EE->TMPL->fetch_param('double_optin', 'yes') === 'yes';
+        $tagdata            = $this->EE->TMPL->tagdata;
+        $this->success      = FALSE;
 
         // Set global error delimiters
         $error_delimiters = explode('|', $error_delimiters);
@@ -114,7 +115,7 @@ class Simple_mailchimp {
         $output  = $this->EE->functions->form_declaration($form_details);
         if (!$browser_validate) {
             $parts = explode('>', $output, 2);
-            $parts[0] .= ' novalidate="true"';
+            $parts[0] .= ' novalidate="novalidate"';
             $output = implode('>', $parts);
         }
         $output .= $this->parse_tagdata($tagdata, $mc_fields);
@@ -211,9 +212,19 @@ class Simple_mailchimp {
                 // {label:MERGE tag}
                 case 'label':
                     // Set defaults from extracted MC field
-                    $tag_attrs = array(
-                        "for=\"{$tag}\""
-                    );
+                    switch ($field_type) {
+                        case 'address':
+                        case 'birthday':
+                        case 'radio':
+                            $tag_attrs = array();
+                            break;
+
+                        default:
+                            $tag_attrs = array(
+                                "for=\"{$tag}\""
+                            );
+                            break;
+                    }
                     // Add user specified attributes
                     foreach ($attr as $key => $val) {
                         $tag_attrs[] = "{$key}=\"{$val}\"";
@@ -257,14 +268,19 @@ class Simple_mailchimp {
                         case "text":
                         case "url":
                             $tag_attrs[] = "type=\"{$field_type}\"";
-                            $tag_attrs[] = "autocapitalize=\"off\"";
-                            $tag_attrs[] = "autocorrect=\"off\"";
-                            $parsed_var .= form_input($tag, $previous, implode(' ', $tag_attrs));
+                            if (!$this->w3c_validate) {
+                                $tag_attrs[] = "autocapitalize=\"off\"";
+                                $tag_attrs[] = "autocorrect=\"off\"";
+                            }
+                            $input_var = form_input($tag, $previous, implode(' ', $tag_attrs));
+                            $parsed_var .= preg_replace('/ type="text"/', '', $input_var, 1);
                             break;
 
                         case "radio":
                             foreach ($choices as $value) {
-                                $parsed_var .= '<br /><label>'.form_radio($tag, $value, ($value === $previous), implode(' ', $tag_attrs)).'&nbsp;&nbsp;'.$value.'</label>';
+                                $attrs = implode(' ', $tag_attrs);
+                                $attrs = str_replace("id=\"{$tag}\"", '', $attrs);
+                                $parsed_var .= '<br /><label>'.form_radio($tag, $value, ($value === $previous), $attrs).'&nbsp;&nbsp;'.$value.'</label>';
                             }
                             break;
 
@@ -274,6 +290,8 @@ class Simple_mailchimp {
 
                         case "birthday":
                         case "address":
+                            $parsed_var .= "<span style=\"color:red; font-weight:bold;\">WARNING: The MailChimp {$field_type} field type is not currently supported.</span>";
+                            break;
                     }
 
                     break;
