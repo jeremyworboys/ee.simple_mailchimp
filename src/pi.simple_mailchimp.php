@@ -103,9 +103,8 @@ class Simple_mailchimp {
         $tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
 
         // Prepare the opening form tag
-        $this->EE->load->helper('url');
         $form_details = array();
-        $form_details['action']        = current_url();
+        $form_details['action']        = $this->EE->functions->fetch_current_uri();
         $form_details['name']          = $form_name;
         $form_details['id']            = $this->EE->TMPL->form_id;
         $form_details['class']         = $this->EE->TMPL->form_class;
