@@ -499,6 +499,12 @@ error_delimeters='<p class="error">|</p>'}
 Changelog
 ===========================
 
+Version 1.5.1
+---------------------------
+
+- Massive speed increase (~250x faster)
+- Update MCAPI
+
 Version 1.5.0
 ---------------------------
 
