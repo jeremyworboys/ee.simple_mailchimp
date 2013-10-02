@@ -27,6 +27,9 @@ $plugin_info = array(
  */
 class Simple_mailchimp {
 
+    // Mailchimp class
+    private $MC;
+
     /**
      * Constructor
      */
@@ -54,9 +57,10 @@ class Simple_mailchimp {
 
         // Bring in MailChimp API
         require_once(PATH_THIRD.'simple_mailchimp/libraries/MCAPI.class.php');
+        $this->MC = new MCAPI($api_key);
 
-        $MC = new MCAPI($api_key);
-        $mc_fields = $MC->listMergeVars($list_id);
+        // Get Mailchimp fields
+        $mc_fields = $this->get_mc_fields($list_id);
 
         // Check to see if the form has been submitted
         if (!empty($_POST) AND $this->EE->input->post(md5($form_name), true)) {
@@ -330,6 +334,37 @@ class Simple_mailchimp {
         }
 
         return $tagdata;
+    }
+
+// -----------------------------------------------------------------------------
+
+    /**
+     * Get Mailchimp data from cache or remote
+     *
+     * @param  string ID of the list to get the fields for
+     * @return string How to use this plugin
+     */
+    private function get_mc_fields($list_id)
+    {
+        $mc_fields = false;
+
+        // @FIXME This is super dirty caching, but it will do until v2.0
+        $cache_path = __DIR__.'/_cache';
+        if (!file_exists($cache_path)) {
+            mkdir($cache_path);
+        }
+
+        $cache_file = $cache_path.'/'.md5('simple_mailchimp::mc_fields_'.$list_id);
+        if (file_exists($cache_file) && (filemtime($cache_file) - time()) < 60) {
+            $mc_fields = @unserialize(file_get_contents($cache_file));
+        }
+
+        if (!$mc_fields) {
+            $mc_fields = $this->MC->listMergeVars($list_id);
+            file_put_contents($cache_file, serialize($mc_fields));
+        }
+
+        return $mc_fields;
     }
 
 // -----------------------------------------------------------------------------
