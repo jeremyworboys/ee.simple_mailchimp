@@ -91,7 +91,7 @@ class Simple_mailchimp {
                     }
                 }
                 // Finally subscribe the user
-                $MC->listSubscribe($list_id, $merge_vars[$email_field], $merge_vars, 'html', $double_optin);
+                $this->MC->listSubscribe($list_id, $merge_vars[$email_field], $merge_vars, 'html', $double_optin);
 
                 // Redirect to the "return" path
                 if ($return) {
