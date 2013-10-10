@@ -11,7 +11,7 @@ $plugin_info = array(
     'pi_name'           => SIMPLE_MAILCHIMP_NAME,
     'pi_version'        => SIMPLE_MAILCHIMP_VERSION,
     'pi_author'         => 'Jeremy Worboys',
-    'pi_author_url'     => 'http://complexcompulsions.com',
+    'pi_author_url'     => 'http://jeremyworboys.com',
     'pi_description'    => 'A simple way to display a MailChimp sign-up form.',
     'pi_usage'          => Simple_mailchimp::usage()
 );
@@ -21,9 +21,9 @@ $plugin_info = array(
  * Simple MailChimp
  *
  * @package    simple_mailchimp
- * @author     Jeremy Worboys <jeremy@complexcompulsions.com>
- * @link       http://complexcompulsions.com/add-ons/simple-mailchimp
- * @copyright  Copyright (c) 2012 Jeremy Worboys
+ * @author     Jeremy Worboys <jw@jeremyworboys.com>
+ * @link       http://jeremyworboys.com/add-ons/simple-mailchimp
+ * @copyright  Copyright (c) 2013 Jeremy Worboys
  */
 class Simple_mailchimp {
 
@@ -498,6 +498,11 @@ error_delimeters='<p class="error">|</p>'}
 
 Changelog
 ===========================
+
+Version 1.5.2
+---------------------------
+
+- Fix regression where subscriptions would fail
 
 Version 1.5.1
 ---------------------------
