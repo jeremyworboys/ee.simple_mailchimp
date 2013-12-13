@@ -499,6 +499,11 @@ error_delimeters='<p class="error">|</p>'}
 Changelog
 ===========================
 
+Version 1.5.3
+---------------------------
+
+- Fix errors in PHP 5.2
+
 Version 1.5.2
 ---------------------------
 
