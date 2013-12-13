@@ -349,7 +349,7 @@ class Simple_mailchimp {
         $mc_fields = false;
 
         // @FIXME This is super dirty caching, but it will do until v2.0
-        $cache_path = __DIR__.'/_cache';
+        $cache_path = dirname(__FILE__).'/_cache';
         if (!file_exists($cache_path)) {
             mkdir($cache_path);
         }
